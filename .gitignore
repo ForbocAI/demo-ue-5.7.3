@@ -1,0 +1,52 @@
+# Unreal Engine — Build Artifacts
+Binaries/
+Intermediate/
+Saved/
+DerivedDataCache/
+Build/
+
+# Plugin build artifacts
+Plugins/*/Binaries/
+Plugins/*/Intermediate/
+
+# Content (not needed for code-only demo)
+Content/
+Releases/
+Collections/
+Developers/
+User/
+
+# Unreal Assets
+*.uasset
+*.umap
+
+# Archives
+*.zip
+
+# Visual Studio / VS Code
+.vs/
+.vscode/
+*.sln
+*.suo
+*.opensdf
+*.sdf
+*.user
+*.code-workspace
+
+# Xcode / macOS
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+.DS_Store
+
+# JetBrains Rider
+.idea/
+*.sln.DotSettings.user
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Other
+*.log
+*.tmp
