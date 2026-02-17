@@ -59,36 +59,36 @@ void ASDKTestActor::ProcessInput(const FString &InputText) {
     return;
   }
 
-  // Process input via free function.
-  // In production this calls the Cortex API asynchronously;
-  // for the demo we use the synchronous simulation path.
-  const FAgentResponse Response =
-      AgentOps::Process(*CurrentAgent, InputText, {});
+  // Process input via async pipeline.
+  AgentOps::Process(
+      *CurrentAgent, InputText, {}, [this](FAgentResponse Response) {
+        // ==========================================
+        // BRIDGE: Validate the Agent's Action
+        // ==========================================
+        // We use the "ActiveRules" we manually registered.
+        // Context would typically include World State.
+        const FBridgeValidationContext ValContext =
+            BridgeFactory::CreateContext(&CurrentAgent->State, {});
 
-  // ==========================================
-  // BRIDGE: Validate the Agent's Action
-  // ==========================================
-  // We use the "ActiveRules" we manually registered.
-  // Context would typically include World State.
-  const FBridgeValidationContext ValContext =
-      BridgeFactory::CreateContext(&CurrentAgent->State, {});
+        const FValidationResult ValResult =
+            BridgeOps::Validate(Response.Action, ActiveRules, ValContext);
 
-  const FValidationResult ValResult =
-      BridgeOps::Validate(Response.Action, ActiveRules, ValContext);
+        if (ValResult.bValid) {
+          UE_LOG(LogTemp, Display, TEXT("Bridge: Action VALID (%s)"),
+                 *ValResult.Reason);
+        } else {
+          UE_LOG(LogTemp, Warning, TEXT("Bridge: Action BLOCKED (%s)"),
+                 *ValResult.Reason);
+          // In a real game, we might override the response or prevent execution
+          // here.
+        }
 
-  if (ValResult.bValid) {
-    UE_LOG(LogTemp, Display, TEXT("Bridge: Action VALID (%s)"),
-           *ValResult.Reason);
-  } else {
-    UE_LOG(LogTemp, Warning, TEXT("Bridge: Action BLOCKED (%s)"),
-           *ValResult.Reason);
-    // In a real game, we might override the response or prevent execution here.
-  }
+        UE_LOG(LogTemp, Display, TEXT("ForbocAI Response: %s"),
+               *Response.Dialogue);
 
-  UE_LOG(LogTemp, Display, TEXT("ForbocAI Response: %s"), *Response.Dialogue);
-
-  // Trigger Blueprint event
-  OnAgentResponse(Response.Dialogue);
+        // Trigger Blueprint event
+        OnAgentResponse(Response.Dialogue);
+      });
 }
 
 void ASDKTestActor::UpdateAgentState(const FString &NewStateDescription) {
