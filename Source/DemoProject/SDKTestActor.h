@@ -70,6 +70,9 @@ public:
   UFUNCTION(BlueprintCallable, Category = "ForbocAI")
   void UpdateAgentState(const FString &NewStateDescription);
 
+  UFUNCTION(BlueprintCallable, Category = "ForbocAI")
+  void ExportSoul();
+
   // --- Events (implement in Blueprint) ---
 
   UFUNCTION(BlueprintImplementableEvent, Category = "ForbocAI")
@@ -77,4 +80,7 @@ public:
 
   UFUNCTION(BlueprintImplementableEvent, Category = "ForbocAI")
   void OnAgentInitialized(const FString &AgentId);
+
+  UFUNCTION(BlueprintImplementableEvent, Category = "ForbocAI")
+  void OnSoulExported(const FString &TxId);
 };

@@ -3,6 +3,7 @@
 #include "AgentModule.h"
 #include "BridgeModule.h"
 #include "MemoryModule.h"
+#include "SoulModule.h"
 
 ASDKTestActor::ASDKTestActor() {
   // No tick needed — this actor responds to events only.
@@ -41,6 +42,11 @@ void ASDKTestActor::InitializeAgent() {
   UE_LOG(LogTemp, Display,
          TEXT("ForbocAI: Registered %d validation rules via RPG Preset"),
          ActiveRules.Num());
+
+  // REGISTER RULES WITH API (New Feature)
+  for (const FValidationRule &Rule : ActiveRules) {
+    BridgeOps::RegisterRule(Rule, ApiUrl);
+  }
 
   // Trigger Blueprint event
   OnAgentInitialized(CurrentAgent->Id);
@@ -102,4 +108,29 @@ void ASDKTestActor::UpdateAgentState(const FString &NewStateDescription) {
 
   UE_LOG(LogTemp, Display, TEXT("ForbocAI: Updated Agent State to '%s'"),
          *JsonState);
+}
+
+void ASDKTestActor::ExportSoul() {
+  if (!CurrentAgent.IsValid()) {
+    UE_LOG(LogTemp, Warning,
+           TEXT("ForbocAI: Cannot export Soul, agent not initialized."));
+    return;
+  }
+
+  // Create Soul from current Agent State
+  // Note: We pass empty memories for demo simplicity, or fetch from
+  // MemoryModule if implemented.
+  FSoul Soul = SoulOps::FromAgent(CurrentAgent->State, {}, CurrentAgent->Id,
+                                  CurrentAgent->Persona);
+
+  UE_LOG(LogTemp, Display, TEXT("ForbocAI: Exporting Soul to Arweave..."));
+
+  // Call SDK Ops
+  SoulOps::ExportToArweave(Soul, ApiUrl, [this](FString TxId) {
+    // Logic inside callback (on game thread via Lambda, ensure thread safety if
+    // needed) Getting back on Game Thread usually handled by HTTP module
+    // callbacks.
+    UE_LOG(LogTemp, Display, TEXT("ForbocAI: Soul Exported! TxId: %s"), *TxId);
+    OnSoulExported(TxId);
+  });
 }
