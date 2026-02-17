@@ -179,4 +179,5 @@ demo-ue-5.7.3/
 - [`sdk-ue-5.7.3/style-guide.md`](../sdk-ue-5.7.3/style-guide.md) — Aesthetic protocol
 
 ---
-(c) 2026 ForbocAI
+## License
+All rights reserved. © 2026 ForbocAI. See [LICENSE](./LICENSE) for full details.
