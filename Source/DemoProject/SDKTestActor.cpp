@@ -1,6 +1,7 @@
 
 #include "SDKTestActor.h"
 #include "AgentModule.h"
+#include "Bot/Factories/BotFactory.h" // Functional Core
 #include "BridgeModule.h"
 #include "MemoryModule.h"
 #include "SoulModule.h"
@@ -50,6 +51,43 @@ void ASDKTestActor::InitializeAgent() {
 
   // Trigger Blueprint event
   OnAgentInitialized(CurrentAgent->Id);
+
+  // ==========================================
+  // FUNCTIONAL CORE VERIFICATION (BotFactory)
+  // ==========================================
+
+  // 1. Create a Bot Store (Closure)
+  auto BotStore = ForbocAI::Bot::Factory::CreateBotStore(TEXT("TestBotOps"));
+
+  // 2. Initial State Check
+  ForbocAI::State::FBotState InitState = BotStore.GetState();
+  UE_LOG(LogTemp, Display,
+         TEXT("FunctionalCore: Created Bot '%s' (Health: %.0f)"),
+         *InitState.Name, InitState.Stats.Health);
+
+  // 3. Dispatch Action (Move)
+  ForbocAI::State::FActionMove MoveAction;
+  MoveAction.TargetLocation = FVector(100, 200, 300);
+  MoveAction.Speed = 50.0f;
+
+  BotStore.Dispatch(MoveAction);
+
+  // 4. Verify State Mutation
+  ForbocAI::State::FBotState AfterMove = BotStore.GetState();
+  UE_LOG(LogTemp, Display, TEXT("FunctionalCore: Post-Move Position: %s"),
+         *AfterMove.Position.ToString());
+
+  // 5. Dispatch Action (Damage) -> Trigger Phase Change
+  ForbocAI::State::FActionTakeDamage DamageAction;
+  DamageAction.Amount = 80.0f; // Drops HP to 20 (below 30%)
+
+  BotStore.Dispatch(DamageAction);
+
+  ForbocAI::State::FBotState AfterDamage = BotStore.GetState();
+  UE_LOG(
+      LogTemp, Display,
+      TEXT("FunctionalCore: Post-Damage HP: %.0f, Phase: %d (Expected Flee=3)"),
+      AfterDamage.Stats.Health, (int32)AfterDamage.Phase);
 }
 
 void ASDKTestActor::ProcessInput(const FString &InputText) {
