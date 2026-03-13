@@ -23,7 +23,7 @@ struct FBotInstance {
 
 /**
  * ABotOrchestrator - The central brain for the Demo's AI entities.
- * Implements the 7-step protocol loop asynchronously for all registered bots.
+ * Implements the Multi-Round Protocol loop asynchronously for all registered bots.
  */
 UCLASS()
 class DEMOPROJECT_API ABotOrchestrator : public AActor {
@@ -53,10 +53,10 @@ private:
   /** Internal registry of active bots. */
   TMap<AActor *, FBotInstance> ActiveBots;
 
-  /** 7-Step Protocol: Stage 1 (Observe & Process) */
+  /** Multi-Round Protocol: Observe & Process */
   void RequestNextAction(FBotInstance &Instance);
 
-  /** 7-Step Protocol: Stage 7 (Execute) */
+  /** Multi-Round Protocol: Execute (Finalize) */
   void ExecuteAction(AActor *BotActor, const FAgentAction &Action);
 
   /** Helper to map game state to strings for observation. */
